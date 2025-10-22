@@ -1,11 +1,12 @@
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const toast = useToast();
+  const router = useRouter(); // Import router
 
   // Common request interceptor
   const onRequest = ({ options }: any) => {
     const accessToken = useCookie("access_token");
-    
+
     if (accessToken.value) {
       options.headers = {
         ...options.headers,
@@ -18,22 +19,23 @@ export default defineNuxtPlugin(() => {
   const onResponseError = async ({ response }: any) => {
     if (response) {
       const error = response._data || { message: 'Unknown error occurred' };
-      
+
       switch (response.status) {
         case 401:
           // Unauthorized - clear token and redirect to login
           const accessToken = useCookie("access_token");
           const refreshToken = useCookie("refresh_token");
-          
+
           accessToken.value = null;
           refreshToken.value = null;
-          localStorage.removeItem("login_response");
-          
-          // Only redirect if not already on login page
-          if (process.client && !window.location.pathname.includes('/auth/login')) {
-            window.location.href = "/auth/login";
+
+          if (process.client) {
+            localStorage.removeItem("login_response");
           }
-          
+
+          // Use navigateTo for a smoother redirect
+          await router.push("/auth/login");
+
           console.log("Unauthorized access attempt", error?.message);
           toast.add({
             title: "Session Expired",
@@ -42,6 +44,7 @@ export default defineNuxtPlugin(() => {
           });
           break;
 
+        // ... (rest of your error handling cases)
         case 403:
           // Forbidden
           console.log("Access forbidden", error.message);

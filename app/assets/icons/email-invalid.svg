@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+  <!-- Circle outline -->
+  <circle cx="10" cy="10" r="8" stroke="#ef4444" />
+  <!-- X mark -->
+  <path d="M7 7 L13 13" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13 7 L7 13" stroke="#ef4444" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

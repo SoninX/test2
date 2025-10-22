@@ -1,4 +1,6 @@
 import { useMutation } from "@pinia/colada";
+import { loginUser } from "~/api/auth"; // Import the function
+import { navigateTo } from '#app';
 
 export interface LoginCredentials {
   email: string;
@@ -22,13 +24,8 @@ export const useAuthStore = defineStore("auth", () => {
   const loginMutation = () => {
     return useMutation<LoginResponse, LoginCredentials>({
       key: ["login"],
-      mutation: (credentials: LoginCredentials) => {
-        const { $apiv2 } = useNuxtApp();
-        return $apiv2("/auth/login", { 
-          method: "POST", 
-          body: credentials 
-        });
-      },
+      // Use the imported API function for the mutation
+      mutation: (credentials: LoginCredentials) => loginUser(credentials),
       onSuccess: (response: LoginResponse) => {
         // Store tokens in cookies
         const accessToken = useCookie("access_token");
@@ -45,16 +42,19 @@ export const useAuthStore = defineStore("auth", () => {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
     const accessToken = useCookie("access_token");
     const refreshToken = useCookie("refresh_token");
-    
+
     accessToken.value = null;
     refreshToken.value = null;
-    
+
     if (process.client) {
       localStorage.removeItem("login_response");
     }
+
+    // Redirect to login page
+    await navigateTo('/auth/login');
   };
 
   return {
