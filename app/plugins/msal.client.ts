@@ -42,15 +42,19 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const msalInstance = new PublicClientApplication(msalConfig)
 
   try {
+    // This method handles the redirect by itself.
+    // When the popup loads, this await will process the token
+    // and communicate back to the parent window.
     await msalInstance.initialize()
   } catch (error) {
     console.error('MSAL Initialization Error:', error)
   }
 
-
-  msalInstance.handleRedirectPromise().catch((error) => {
-    console.error('MSAL Redirect Error:', error)
-  })
+  // --- REMOVED THIS BLOCK ---
+  // msalInstance.handleRedirectPromise().catch((error) => {
+  //   console.error('MSAL Redirect Error:', error)
+  // })
+  // --- END OF REMOVAL ---
 
   return {
     provide: {

@@ -17,7 +17,7 @@ export default defineNuxtConfig({
       authApiUrl: "https.api.escuelajs.co/api/v1", // For authentication
       azureClientId: "711a16f4-eded-40a3-addf-0eabb508d974",
       azureTenantId: "86fb359e-1360-4ab3-b90d-2a68e8c007b9",
-      azureRedirectUri: "http://localhost:3000/auth/redirect"
+      azureRedirectUri: "http://localhost:3000"
     },
   },
   vite: {
