@@ -3,8 +3,10 @@ import { useAuthStore } from '~/stores/auth';
 export default defineNuxtRouteMiddleware((to) => {
   const auth = useAuthStore()
 
-  // If not authenticated and not already on the login page
-  if (!auth.isAuthenticated && !to.path.startsWith('/auth/login')) {
+  // --- THIS IS THE FIX ---
+  // If not authenticated and not on ANY page under /auth/...
+  if (!auth.isAuthenticated && !to.path.startsWith('/auth')) {
+  // --- END OF FIX ---
     return navigateTo('/auth/login')
   }
 })
