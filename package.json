@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.25.1",
     "@nuxt/ui": "4.0.1",
     "@pinia/colada": "^0.17.5",
     "@pinia/colada-nuxt": "0.2.2",
