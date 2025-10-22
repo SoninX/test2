@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: "", // For main data
-      authApiUrl: import.meta.env.AUTH_URI, // For authentication
+      authApiUrl: import.meta.env.NUXT_PUBLIC_API_URL, // For authentication
       azureClientId: import.meta.env.NUXT_PUBLIC_AZURE_CLIENT_ID,
       azureTenantId: import.meta.env.NUXT_PUBLIC_AZURE_TENANT_ID,
       azureRedirectUri: import.meta.env.NUXT_PUBLIC_AZURE_REDIRECT_URI
