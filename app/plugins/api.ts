@@ -109,22 +109,22 @@ export default defineNuxtPlugin(() => {
 
   // API v1 instance - for external API (like JSONPlaceholder)
   const apiv1 = $fetch.create({
-    baseURL: config.public.apiUrl as string,
+    baseURL: config.public.apiUrl as string, // Reads from NUXT_PUBLIC_API_URL
     onRequest,
     onResponseError,
   });
 
-  // API v2 instance - for auth API (different base URL)
+  // API v2 instance - for auth API
   const apiv2 = $fetch.create({
-    baseURL: "https://api.escuelajs.co/api/v1", // Auth API base URL
+    baseURL: config.public.authApiUrl as string, // <-- CORRECTED: Reads from NUXT_PUBLIC_AUTH_API_URL
     onRequest,
     onResponseError,
   });
 
   return {
     provide: {
-      apiv1, // For main API calls
-      apiv2, // For auth API calls
+      apiv1, 
+      apiv2, 
     },
   };
 });
