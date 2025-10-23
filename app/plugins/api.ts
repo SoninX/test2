@@ -1,7 +1,7 @@
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const toast = useToast();
-  const router = useRouter(); // Import router
+  const router = useRouter();
 
   // Common request interceptor
   const onRequest = ({ options }: any) => {

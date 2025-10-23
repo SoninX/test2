@@ -1,7 +1,9 @@
 import { useMutation } from "@pinia/colada";
 import { loginUser, exchangeSsoToken } from "~/api/auth";
 import { navigateTo } from '#app';
+// UPDATED: Added InteractionRequiredAuthError for better error handling
 import type { AuthenticationResult, PublicClientApplication } from '@azure/msal-browser';
+import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
 
 declare module '#app' {
   interface NuxtApp {
@@ -62,20 +64,54 @@ export const useAuthStore = defineStore("auth", () => {
       mutation: async () => {
         try {
           const msalResponse: AuthenticationResult = await $msalInstance.loginPopup(msalLoginRequest);
-          console.log(msalResponse)
+          
+          // --- 1. LOG MSAL RESPONSE (As you requested) ---
+          console.log("MSAL Response from Microsoft:", msalResponse);
+
           if (msalResponse && msalResponse.accessToken) {
-            const fastapiResponse = await exchangeSsoToken(msalResponse.accessToken);
-            return fastapiResponse;
+            
+            // --- 2. STORE REAL TOKEN FOR YOUR TESTING ---
+            if (process.client) {
+              sessionStorage.setItem("msal_token_for_testing", msalResponse.accessToken);
+              console.log("Real MSAL access token stored in sessionStorage('msal_token_for_testing') for backend testing.");
+            }
+
+            // --- 3. MOCK BACKEND CALL (Since your backend isn't ready) ---
+            // When your FastAPI /auth/sso-exchange endpoint is ready,
+            // you can uncomment the real call below and remove the mock.
+
+            // const fastapiResponse = await exchangeSsoToken(msalResponse.accessToken);
+            // return fastapiResponse;
+
+            // --- Mock Response ---
+            const mockFastApiResponse: LoginResponse = {
+              access_token: "mock-access-token-from-sso",
+              refresh_token: "mock-refresh-token-from-sso",
+              user: msalResponse.account?.name || "SSO User"
+            };
+            
+            return mockFastApiResponse;
+            // --- End of Mock ---
+
           } else {
             throw new Error("MSAL login failed or returned no access token.");
           }
         } catch (error) {
-          console.error("SSO Error:", error);
+          console.error("SSO Mutation Error:", error);
+
+          // Handle common MSAL errors (like user closing the popup)
+          if (error instanceof BrowserAuthError && (error.errorCode.includes("popup_window_error") || error.errorCode.includes("user_cancelled"))) {
+             throw new Error("Login popup was closed. Please try again.");
+          }
+
+          // Handle other errors
           throw new Error("SSO login failed. Please try again.");
         }
       },
       onSuccess: (response: LoginResponse) => {
+        // This will now run with the mock response
         saveSession(response);
+        console.log("Mock session saved:", response);
       },
     });
   };
@@ -90,6 +126,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (process.client) {
       localStorage.removeItem("login_response");
       sessionStorage.removeItem("fastapi_token");
+      sessionStorage.removeItem("msal_token_for_testing"); // Clean up mock
     }
 
     const { $msalInstance } = useNuxtApp();
