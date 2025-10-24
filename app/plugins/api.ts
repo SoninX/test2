@@ -116,7 +116,7 @@ export default defineNuxtPlugin(() => {
 
   // API v2 instance - for auth API
   const apiv2 = $fetch.create({
-    baseURL: config.public.authApiUrl as string, // <-- CORRECTED: Reads from NUXT_PUBLIC_AUTH_API_URL
+    baseURL: config.public.authApiUrl as string,
     onRequest,
     onResponseError,
   });

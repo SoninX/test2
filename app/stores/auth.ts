@@ -1,7 +1,6 @@
 import { useMutation } from "@pinia/colada";
 import { loginUser, exchangeSsoToken } from "~/api/auth";
 import { navigateTo } from '#app';
-// UPDATED: Added InteractionRequiredAuthError for better error handling
 import type { AuthenticationResult, PublicClientApplication } from '@azure/msal-browser';
 import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
 
@@ -76,7 +75,7 @@ export const useAuthStore = defineStore("auth", () => {
               console.log("Real MSAL access token stored in sessionStorage('msal_token_for_testing') for backend testing.");
             }
 
-            // --- 3. MOCK BACKEND CALL (Since your backend isn't ready) ---
+            // --- 3. MOCK BACKEND CALL (backend not ready) ---
             // When your FastAPI /auth/sso-exchange endpoint is ready,
             // you can uncomment the real call below and remove the mock.
 
@@ -126,7 +125,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (process.client) {
       localStorage.removeItem("login_response");
       sessionStorage.removeItem("fastapi_token");
-      sessionStorage.removeItem("msal_token_for_testing"); // Clean up mock
+      sessionStorage.removeItem("msal_token_for_testing");
     }
 
     const { $msalInstance } = useNuxtApp();
