@@ -1,5 +1,7 @@
+// app/stores/auth.ts
+
 import { useMutation } from "@pinia/colada";
-import { loginUser, exchangeSsoToken } from "~/api/auth";
+import { loginUser, exchangeSsoToken, type SsoExchangePayload } from "~/api/auth"; // Import the new type
 import { navigateTo } from '#app';
 import type { AuthenticationResult, PublicClientApplication } from '@azure/msal-browser';
 import { InteractionRequiredAuthError, BrowserAuthError } from '@azure/msal-browser';
@@ -35,6 +37,7 @@ export const useAuthStore = defineStore("auth", () => {
     const accessToken = useCookie("access_token");
     const refreshToken = useCookie("refresh_token");
 
+    // We only want the *backend response* token stored.
     accessToken.value = response.access_token;
     refreshToken.value = response.refresh_token;
 
@@ -42,6 +45,7 @@ export const useAuthStore = defineStore("auth", () => {
       localStorage.setItem("login_response", JSON.stringify(response));
       sessionStorage.setItem("fastapi_token", response.access_token);
     }
+    // IMPORTANT: Per your request, the MSAL tokens are NOT stored here.
   };
 
   // Actions
@@ -57,6 +61,7 @@ export const useAuthStore = defineStore("auth", () => {
   
   const ssoLoginMutation = () => {
     const { $msalInstance } = useNuxtApp();
+    const toast = useToast();
 
     return useMutation<LoginResponse, void>({
       key: ['ssoLogin'],
@@ -65,41 +70,50 @@ export const useAuthStore = defineStore("auth", () => {
           const msalResponse: AuthenticationResult = await $msalInstance.loginPopup(msalLoginRequest);
           
           // --- 1. LOG MSAL RESPONSE (As you requested) ---
-          console.log("MSAL Response from Microsoft:", msalResponse);
+          console.log("MSAL Response from Microsoft (Source of Tokens/Info):", msalResponse);
 
-          if (msalResponse && msalResponse.accessToken) {
-            
-            // --- 2. STORE REAL TOKEN FOR YOUR TESTING ---
-            if (process.client) {
-              sessionStorage.setItem("msal_token_for_testing", msalResponse.accessToken);
-              console.log("Real MSAL access token stored in sessionStorage('msal_token_for_testing') for backend testing.");
-            }
-
-            // --- 3. MOCK BACKEND CALL (backend not ready) ---
-            // When your FastAPI /auth/sso-exchange endpoint is ready,
-            // you can uncomment the real call below and remove the mock.
-
-            // const fastapiResponse = await exchangeSsoToken(msalResponse.accessToken);
-            // return fastapiResponse;
-
-            // --- Mock Response ---
-            const mockFastApiResponse: LoginResponse = {
-              access_token: "mock-access-token-from-sso",
-              refresh_token: "mock-refresh-token-from-sso",
-              user: msalResponse.account?.name || "SSO User"
-            };
-            
-            return mockFastApiResponse;
-            // --- End of Mock ---
-
-          } else {
-            throw new Error("MSAL login failed or returned no access token.");
+          if (!msalResponse || !msalResponse.accessToken || !msalResponse.idToken || !msalResponse.account) {
+            throw new Error("MSAL login failed or returned missing token/account data.");
           }
+
+          // --- 2. Extract Data and Construct Payload ---
+          const exchangePayload: SsoExchangePayload = {
+            access_token: msalResponse.accessToken,
+            id_token: msalResponse.idToken,
+            contact: {
+              name: msalResponse.account.name || "Unknown User",
+              username: msalResponse.account.username || "unknown@user.com",
+            }
+          };
+
+          // --- 3. LOG PAYLOAD BEFORE "BACKEND CALL" ---
+          console.log("Payload sent to backend (mocked):", exchangePayload);
+
+          // --- 4. MOCK BACKEND CALL (backend not ready) ---
+          // When your FastAPI /auth/sso-exchange endpoint is ready,
+          // you can uncomment the real call below and remove the mock.
+
+          // const fastapiResponse = await exchangeSsoToken(exchangePayload);
+          // return fastapiResponse;
+
+          // --- Mock Response ---
+          const mockFastApiResponse: LoginResponse = {
+            access_token: "mock-fastapi-access-token",
+            refresh_token: "mock-fastapi-refresh-token",
+            user: exchangePayload.contact.name,
+            email: exchangePayload.contact.username,
+            // Include the data that the backend would normally return after validation
+          };
+          
+          return mockFastApiResponse;
+          // --- End of Mock ---
+
         } catch (error) {
           console.error("SSO Mutation Error:", error);
 
           // Handle common MSAL errors (like user closing the popup)
           if (error instanceof BrowserAuthError && (error.errorCode.includes("popup_window_error") || error.errorCode.includes("user_cancelled"))) {
+             toast.add({ title: "Login cancelled", description: "The login popup was closed. Please try again.", color: "info" });
              throw new Error("Login popup was closed. Please try again.");
           }
 
@@ -110,7 +124,7 @@ export const useAuthStore = defineStore("auth", () => {
       onSuccess: (response: LoginResponse) => {
         // This will now run with the mock response
         saveSession(response);
-        console.log("Mock session saved:", response);
+        console.log("Backend response saved to session/cookies:", response);
       },
     });
   };
@@ -125,7 +139,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (process.client) {
       localStorage.removeItem("login_response");
       sessionStorage.removeItem("fastapi_token");
-      sessionStorage.removeItem("msal_token_for_testing");
+      // Removed the 'msal_token_for_testing' cleanup as it's no longer saved
     }
 
     const { $msalInstance } = useNuxtApp();
