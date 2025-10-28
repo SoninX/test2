@@ -40,11 +40,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   }
 
   const msalInstance = new PublicClientApplication(msalConfig)
-  // This prepares the instance for use.
+  
   await msalInstance.initialize()
-  // This must be called on *every* page load.
-  // When the popup redirects here, this method will
-  // process response and send to parent and close popup
+
   await msalInstance.handleRedirectPromise().catch((error) => {
     console.warn('MSAL Redirect Error/Cancel:', error)
   })

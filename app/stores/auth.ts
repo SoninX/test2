@@ -69,14 +69,12 @@ export const useAuthStore = defineStore("auth", () => {
         try {
           const msalResponse: AuthenticationResult = await $msalInstance.loginPopup(msalLoginRequest);
           
-          // --- 1. LOG MSAL RESPONSE (As you requested) ---
           console.log("MSAL Response from Microsoft (Source of Tokens/Info):", msalResponse);
 
           if (!msalResponse || !msalResponse.accessToken || !msalResponse.idToken || !msalResponse.account) {
             throw new Error("MSAL login failed or returned missing token/account data.");
           }
 
-          // --- 2. Extract Data and Construct Payload ---
           const exchangePayload: SsoExchangePayload = {
             access_token: msalResponse.accessToken,
             id_token: msalResponse.idToken,
@@ -86,7 +84,6 @@ export const useAuthStore = defineStore("auth", () => {
             }
           };
 
-          // --- 3. LOG PAYLOAD BEFORE "BACKEND CALL" ---
           console.log("Payload sent to backend (mocked):", exchangePayload);
 
           // --- 4. MOCK BACKEND CALL (backend not ready) ---
@@ -139,7 +136,6 @@ export const useAuthStore = defineStore("auth", () => {
     if (process.client) {
       localStorage.removeItem("login_response");
       sessionStorage.removeItem("fastapi_token");
-      // Removed the 'msal_token_for_testing' cleanup as it's no longer saved
     }
 
     const { $msalInstance } = useNuxtApp();

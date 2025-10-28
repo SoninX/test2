@@ -1,3 +1,4 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
 
@@ -10,7 +11,6 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   modules: ["@nuxt/ui","@pinia/nuxt", "@pinia/colada-nuxt"],
-  
   runtimeConfig: {
     public: {
       apiUrl: "", // For main data

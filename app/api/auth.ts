@@ -7,7 +7,6 @@ export interface SsoExchangePayload {
     name: string;
     username: string;
   }
-   // Corresponds to the 'username' key in the image
 }
 
 export const loginUser = (credentials: LoginCredentials): Promise<LoginResponse> => {
@@ -21,10 +20,8 @@ export const loginUser = (credentials: LoginCredentials): Promise<LoginResponse>
 export const exchangeSsoToken = (payload: SsoExchangePayload): Promise<LoginResponse> => {
   const { $apiv2 } = useNuxtApp();
   
-  // IMPORTANT: Adjust this endpoint to your FastAPI route
   return $apiv2("/auth/sso-exchange", {
     method: "POST",
-    // The payload is now sent directly as the body
     body: payload,
   });
 };
