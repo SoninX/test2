@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import * as z from "zod";
 import { useAuthStore } from "~/stores/auth";
-import { useToast } from "#imports";
-
-definePageMeta({
-  layout: "auth",
-});
 
 useSeoMeta({
   title: "Login",
@@ -79,7 +74,7 @@ const show = ref(false);
 // Submit
 async function onSubmit() {
   try {
-    schema.parse(formData);
+    // schema.parse(formData);
 
     await login({
       email: formData.email,
@@ -95,10 +90,11 @@ async function onSubmit() {
   } catch (err: any) {
     toast.add({
       title: "Login failed",
-      description:
-        err?.data?.message ||
-        err?.message ||
-        "Login failed. Please check your credentials.",
+      description: errorMessage.value,
+      // description:
+      //   err?.data?.message ||
+      //   err?.message ||
+      //   "Login failed. Please check your credentials.",
       color: "error",
     });
   }
@@ -107,11 +103,11 @@ async function onSubmit() {
 
 <template>
   <div class="w-screen h-screen relative">
-    <!-- Background layer -->
+    <!-- Background image layer -->
     <div
-      class="absolute inset-0 bg-orange-400/40 bg-[url('~/assets/images/background.png')] bg-cover bg-center mix-blend-multiply"
+      class="absolute inset-0 bg-[url('~/assets/images/background.png')] bg-cover bg-center"
+      aria-hidden="true"
     ></div>
-
     <!-- Main content -->
     <div class="relative z-10 flex w-full h-full">
       <!-- Left side -->
@@ -128,8 +124,8 @@ async function onSubmit() {
       </div>
 
       <!-- Right side (form) -->
-      <div class="flex  mt-28 w-1/2 pl-24">
-        <UCard class=" rounded-3xl w-[538px] h-[588px] p-8">
+      <div class="flex  mt-28 w-1/2">
+        <UCard class=" rounded-3xl  h-[588px] p-13 ml-26">
           <div class="flex flex-col items-left">
             <img
               src="~/assets/images/ZEBO.png"

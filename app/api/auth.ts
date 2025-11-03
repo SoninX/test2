@@ -1,15 +1,10 @@
-import type { LoginCredentials, LoginResponse } from "~/stores/auth";
+import type { LoginCredentials, BackendAuthResponse } from "~/stores/auth";
 
 export interface SsoExchangePayload {
-  access_token: string;
   id_token: string;
-  contact: {
-    name: string;
-    username: string;
-  }
 }
 
-export const loginUser = (credentials: LoginCredentials): Promise<LoginResponse> => {
+export const loginUser = (credentials: LoginCredentials): Promise<BackendAuthResponse> => {
   const { $apiv2 } = useNuxtApp();
   return $apiv2("/auth/login", {
     method: "POST",
@@ -17,7 +12,7 @@ export const loginUser = (credentials: LoginCredentials): Promise<LoginResponse>
   });
 };
 
-export const exchangeSsoToken = (payload: SsoExchangePayload): Promise<LoginResponse> => {
+export const exchangeSsoToken = (payload: SsoExchangePayload): Promise<BackendAuthResponse> => {
   const { $apiv2 } = useNuxtApp();
   
   return $apiv2("/auth/sso-exchange", {
